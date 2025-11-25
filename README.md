@@ -126,7 +126,7 @@ Final Project/
 Update your connection string in the code:
 
 ```cpp
-Database db("dbname=fitness user=postgres password=YourPassword host=localhost port=5432");
+Database db("host=localhost dbname=fitness user=postgres password=password");
 ```
 
 Replace `YourPassword` with the password you set for `postgres`.
