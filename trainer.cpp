@@ -13,7 +13,7 @@ void TrainerSystem::addAvailability(Database& db) {
 
     cout << "Start time (YYYY-MM-DD HH:MM): ";
     getline(cin, s);
-    cout << "End time: ";
+    cout << "End time (YYYY-MM-DD HH:MM): ";
     getline(cin, e);
 
     // Check for overlap
@@ -80,3 +80,4 @@ void TrainerSystem::viewMemberProgress(Database& db, int memberId) {
     }
     PQclear(r);
 }
+
