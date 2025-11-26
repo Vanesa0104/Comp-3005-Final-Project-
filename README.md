@@ -57,7 +57,7 @@ pacman -S --needed mingw-w64-ucrt-x86_64-toolchain make
 psql -U postgres -d fitness -f fitness_setup.sql
 ```
 
-I had a corrupt file that prevent me from connecting to PG Admin 4, so I'm putting this here just in case
+I had a corrupt file that prevented me from connecting to PG Admin 4, so I'm putting this here just in case
 
 2. Open `psql`:
 
