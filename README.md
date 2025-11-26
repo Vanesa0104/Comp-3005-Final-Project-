@@ -2,7 +2,8 @@
 
 ## Overview
 This is a C++ console application for managing a fitness center.  
-It connects to a PostgreSQL database to manage members, trainers, admins, personal training sessions, group classes, health metrics, fitness goals, and equipment maintenance logs.
+
+It connects to a PostgreSQL database to manage members, trainers and admins. Members can sign up, scheledule personal training sessions, and update/add health metrics and set fitness goals. Trainers can add thier availability, view thier schedule and view a member's progress. Admins can view a room's schedule, book a room for a PT session, add equipment, log equipment maintenance, and they can create a class, update the capacity and cancel a class.
 
 The app uses **libpq** (PostgreSQL C API) for database interactions and a **Makefile** for building the project.
 
@@ -50,13 +51,15 @@ pacman -S --needed mingw-w64-ucrt-x86_64-toolchain make
 
 ### 3. Set up the PostgreSQL database
 
+I had a corrupt file that prevent me from connecting to PG Admin 4, so I'm putting this here just in case
+
 1. Open `psql`:
 
 ```bash
 psql -U postgres
 ```
 
-2. Create and connect to the `fitness` database:
+2. Make sure you can connect to the `fitness` database:
 
 ```sql
 \c fitness
@@ -66,19 +69,20 @@ psql -U postgres
 
 ### 4. Build the application
 
-1. Open **MSYS2 UCRT64** and navigate to your project folder:
+1. Open **MSYS2 UCRT64** and navigate to the project folder:
 
 ```bash
-cd "/c/Users/Anava/Downloads/Comp 3005/Final Project"
+cd "/c/Users/path/to/folder/location"
 ```
 
 2. Build with Make:
 
 ```bash
+make clean
 make
 ```
 
-This compiles the source files and links them with **libpq** to create `fitness_app.exe`.
+This removes any previous object files (there shouldn't be any but just in case) and compiles the source files and links them with **libpq** to create `fitness_app.exe`.
 
 ---
 
@@ -123,13 +127,13 @@ Final Project/
 
 ## Database Connection
 
-Update your connection string in the code:
+Update your connection string in the main.cpp file code:
 
 ```cpp
 Database db("host=localhost dbname=fitness user=postgres password=password");
 ```
 
-Replace `YourPassword` with the password you set for `postgres`.
+Replace `password` with the password you set for `postgres`.
 
 ---
 
@@ -147,11 +151,3 @@ Ana Vanesa De Leon Bonilla
 101279256
 COMP 3005 - Final Project
 
-```
-
----
-
-If you want, I can also **add a “Quick Start” section at the top** that runs the database creation, compilation, and execution in **just 3 commands** so anyone can run it immediately.  
-
-Do you want me to do that?
-```
