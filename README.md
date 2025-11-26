@@ -51,7 +51,7 @@ pacman -S --needed mingw-w64-ucrt-x86_64-toolchain make
 
 ### 3. Set up the PostgreSQL database
 
-1. Open fitness_setup.sql 
+1. Navigate to project folder and open fitness_setup.sql using PostgreSQL 
 
 ```sql
 psql -U postgres -d fitness -f fitness_setup.sql
