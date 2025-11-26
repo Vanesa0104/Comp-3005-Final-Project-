@@ -51,15 +51,21 @@ pacman -S --needed mingw-w64-ucrt-x86_64-toolchain make
 
 ### 3. Set up the PostgreSQL database
 
+1. Open fitness_setup.sql 
+
+```sql
+psql -U postgres -d fitness -f fitness_setup.sql
+```
+
 I had a corrupt file that prevent me from connecting to PG Admin 4, so I'm putting this here just in case
 
-1. Open `psql`:
+2. Open `psql`:
 
 ```bash
 psql -U postgres
 ```
 
-2. Make sure you can connect to the `fitness` database:
+3. Make sure you can connect to the `fitness` database:
 
 ```sql
 \c fitness
