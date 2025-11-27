@@ -24,8 +24,7 @@ The app uses **libpq** (PostgreSQL C API) for database interactions and a **Make
 ---
 
 ## Requirements
-- **Windows 10/11**
-- **MSYS2** with **UCRT64**
+- **MSYS2** with **UCRT64** (Not really nessecary but it's what I'm using in video)
 - **g++** compiler
 - **make**
 - **PostgreSQL 18**
@@ -37,10 +36,11 @@ The app uses **libpq** (PostgreSQL C API) for database interactions and a **Make
 
 ### 1. Install MSYS2 and PostgreSQL
 
-You should already have PostgreSQL but if not,
+You should already have PostgreSQL but if not... 
+Also below is a link to download MYSYS2 if you want :)
 
-- Download and install [MSYS2](https://www.msys2.org/)
 - Install PostgreSQL 18 and note your `postgres` user password
+- Download and install [MSYS2](https://www.msys2.org/)
 
 ### 2. Install C++ toolchain in MSYS2 UCRT64
 Open **MSYS2 UCRT64** and run:
@@ -57,15 +57,21 @@ pacman -S --needed mingw-w64-ucrt-x86_64-toolchain make
 psql -U postgres -d fitness -f fitness_setup.sql
 ```
 
+2. Insert default data from fitness_data.sql using PostgreSQL
+
+```sql
+psql -U postgres -d fitness -f fitness_data.sql
+```
+
 I had a corrupt file that prevented me from connecting to PG Admin 4, so I'm putting this here just in case
 
-2. Open `psql`:
+3. Open `psql` and enter your password:
 
 ```bash
 psql -U postgres
 ```
 
-3. Make sure you can connect to the `fitness` database:
+4. Make sure you can connect to the `fitness` database:
 
 ```sql
 \c fitness
@@ -81,6 +87,17 @@ psql -U postgres
 cd "/c/Users/path/to/folder/location"
 ```
 
+You should update the connection string in the main.cpp file code:
+
+```cpp
+Database db("host=localhost dbname=fitness user=postgres password=password");
+```
+
+Replace `password` with the password you set for `postgres`.
+
+---
+
+
 2. Build with Make:
 
 ```bash
@@ -88,7 +105,8 @@ make clean
 make
 ```
 
-This removes any previous object files (there shouldn't be any but just in case) and compiles the source files and links them with **libpq** to create `fitness_app.exe`.
+This removes any previous object files (there shouldn't be any but just in case) and compiles the source files and links them with **libpq** to create 
+`fitness_app.exe`.
 
 ---
 
@@ -118,28 +136,19 @@ Final Project/
 ├── trainer.cpp
 ├── trainer.hpp
 ├── db.hpp
+├── fitness_data.sql
+├── fitness_setup.sql
 ├── Makefile
-└── README.md
+└── README
 ```
 
 * `db.hpp` – Handles PostgreSQL connection and query execution
 * `admin.hpp` / `admin.cpp` – Admin functionalities
 * `member.hpp` / `member.cpp` – Member functionalities
 * `trainer.hpp` / `trainer.cpp` – Trainer functionalities
+* `fitness_setup.sql` / `fitness_data.sql` – Database creation and data insertation 
 * `Makefile` – Build instructions
 * `main.cpp` – Main program entry point
-
----
-
-## Database Connection
-
-Update your connection string in the main.cpp file code:
-
-```cpp
-Database db("host=localhost dbname=fitness user=postgres password=password");
-```
-
-Replace `password` with the password you set for `postgres`.
 
 ---
 
@@ -148,6 +157,7 @@ Replace `password` with the password you set for `postgres`.
 * Make sure PostgreSQL is running before launching the app.
 * The app must connect to the `fitness` database.
 * Tables must be created before running the app, otherwise SQL errors will occur.
+* Also I'm assuming that a weekly availablity is only for say about a month (4 weeks) and not indefinitely
 
 ---
 
