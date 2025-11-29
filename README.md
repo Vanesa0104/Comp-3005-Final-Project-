@@ -118,7 +118,7 @@ This removes any previous object files (there shouldn't be any but just in case)
 
 Follow the console menu to:
 
-* Eexplore Member Functions
+* Explore Member Functions
 * Explore Trainer Functions
 * Explore Admin Functions
 
