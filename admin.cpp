@@ -52,10 +52,15 @@ void AdminSystem::bookRoom(Database& db, const string& roomName, int trainerId, 
 }
 
 // Adding equipment function
-void AdminSystem::addEquipment(Database& db, const string& name) {
+void AdminSystem::addEquipment(Database& db, const string& equip_name) {
     // Insert the equipment inot equipment table
-    string q = "INSERT INTO Equipment (name) VALUES ('" + name + "');";
-    db.exec(q);
+    string q = "INSERT INTO Equipment (name) VALUES ('" + equip_name + "');";
+    PGresult* r = db.exec(q);
+
+    if (!r) {
+        cout << "Unexpected SQL error. Already in equipment.\n";
+        return;
+    }
 
     // Let user know alls good
     cout << "Equipment added.\n";
@@ -109,11 +114,41 @@ void AdminSystem::updateClassCapacity(Database& db, int classId, int newCapacity
 
 // Deleting a class function
 void AdminSystem::cancelClass(Database& db, int classId) {
-    // Delete class choosen based off of ^^^ and deltes it from Group Class table
-    string q = "DELETE FROM GroupClass WHERE class_id=" + to_string(classId) + ";";
-    db.exec(q);
+    // Check if class exists
+    // Also avoid repeating statement
+    string checkQ = "SELECT COUNT(*) FROM GroupClass WHERE class_id=" + to_string(classId) + ";";
+    PGresult* res = db.exec(checkQ);
+
+    // Error while checking
+    if (!res) {
+        cout << "Database error while checking class existence.\n";
+        return;
+    }
+
+    // The class exists
+    int exists = atoi(PQgetvalue(res, 0, 0));
+    // Clears res (result of ^^^ checkQ)
+    PQclear(res);
+
+    if (exists == 0) {
+        // If class doesn't exist, let user know
+        cout << "Error: Class with ID " << classId << " does not exist.\n";
+        return;
+    }
+
+    // Delete class choosen based off of user input and deletes it from Group Class table
+    string delQ = "DELETE FROM GroupClass WHERE class_id=" + to_string(classId) + ";";
+    PGresult* delRes = db.exec(delQ);
+
+    // In case error occurs
+    if (!delRes) {
+        cout << "Database error while deleting class.\n";
+        return;
+    }
+
+    // Clears result
+    PQclear(delRes);
 
     // Lets user know class was cancelled
-    cout << "Class canceled.\n";
+    cout << "Class canceled successfully.\n";
 }
-
