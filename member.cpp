@@ -90,7 +90,6 @@ void MemberSystem::setGoal(Database& db) {
     PQclear(r);
 }
 
-// Schedule PT session function (members ver.)
 void MemberSystem::schedulePT(Database& db) {
     int mId, tId;
     string start, end, room;
@@ -109,7 +108,7 @@ void MemberSystem::schedulePT(Database& db) {
     cout << "Room: ";
     getline(cin, room);
 
-    // Insert pt session IF trainer is available
+    // Insert PT session IF trainer is available
     string q =
         "INSERT INTO PTSession (member_id, trainer_id, start_time, end_time, room) "
         "SELECT " + to_string(mId) + "," + to_string(tId) + ",'" + start + "','" + end + "','" + room + "' "
@@ -117,16 +116,21 @@ void MemberSystem::schedulePT(Database& db) {
         "WHERE trainer_id=" + to_string(tId) +
         " AND '" + start + "' >= start_time "
         "AND '" + end + "' <= end_time);";
-    // Result of ^^ and checks if valid
+
     PGresult* r = db.exec(q);
-    if (!r) {
-        // Trainer is prob not available
-        cout << "Failed: Trainer may not be available!\n";
+    if (!r) return;
+
+    // Check number of rows actually inserted
+    int affected = atoi(PQcmdTuples(r));
+    PQclear(r);
+
+    if (affected == 0) {
+        cout << "Failed: Trainer may not be available at that time.\n";
         return;
     }
-    // Lets user know all good and clears r
+
+    // Lets user know all good
     cout << "PT session scheduled successfully.\n";
-    PQclear(r);
 }
 
 // Update member profile function 
