@@ -14,6 +14,7 @@ public:
     // Equipment management
     static void addEquipment(Database& db, const string& name);
     static void logMaintenance(Database& db, int equipmentId, const string& issue, const string& assignedTo);
+    static void updateMaintenance(Database& db, int maintenanceId, const string& status, const string& notes);
 
     // Class management
     static void createClass(Database& db, const string& className, int trainerId, const string& classTime, int capacity);
