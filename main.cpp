@@ -95,7 +95,7 @@ void availabilityMenu(Database& db, int trainerId) {
 int main() {
     // IMPORTANT!!!!!!
     // CHANGE to your actual PostgreSQL password
-    Database db("host=localhost dbname=fitness user=postgres password=Vanesa@2004");
+    Database db("host=localhost dbname=fitness user=postgres password=");
 
     while (true) {
         // Menu for choosing role
