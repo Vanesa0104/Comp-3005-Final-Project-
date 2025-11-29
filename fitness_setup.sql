@@ -108,7 +108,7 @@ CREATE TABLE MaintenanceLog (
 
 CREATE TABLE MemberClass (
     member_id INT REFERENCES Member(member_id),
-    class_id INT REFERENCES GroupClass(class_id),
+    class_id INT REFERENCES GroupClass(class_id) ON DELETE CASCADE,
     PRIMARY KEY (member_id, class_id)
 );
 
