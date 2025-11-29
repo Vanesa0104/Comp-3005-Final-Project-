@@ -1,12 +1,13 @@
--- Connect to default postgres database
+-- CONNECT & DATABASE SETUP
+
 \c postgres;
 
--- Drop & create fitness database
-DROP DATABASE IF EXISTS fitness;
+-- DROP DATABASE IF EXISTS fitness;
 CREATE DATABASE fitness;
 
--- Connect to fitness database
 \c fitness;
+
+-- TABLES
 
 -- Members table
 CREATE TABLE Member (
@@ -33,6 +34,12 @@ CREATE TABLE Admin (
     email VARCHAR(100) UNIQUE NOT NULL
 );
 
+-- Rooms table
+CREATE TABLE Room (
+    room_id SERIAL PRIMARY KEY,
+    room_name VARCHAR(50) UNIQUE NOT NULL
+);
+
 -- Personal Training Sessions
 CREATE TABLE PTSession (
     session_id SERIAL PRIMARY KEY,
@@ -40,7 +47,8 @@ CREATE TABLE PTSession (
     trainer_id INT REFERENCES Trainer(trainer_id),
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
-    room VARCHAR(50) NOT NULL
+    room VARCHAR(50) NOT NULL,
+    FOREIGN KEY (room) REFERENCES Room(room_name)
 );
 
 -- Group Classes
@@ -52,7 +60,7 @@ CREATE TABLE GroupClass (
     capacity INT NOT NULL
 );
 
--- Health Metrics (height added)
+-- Health Metrics
 CREATE TABLE HealthMetric (
     metric_id SERIAL PRIMARY KEY,
     member_id INT REFERENCES Member(member_id),
@@ -73,7 +81,7 @@ CREATE TABLE FitnessGoal (
     active BOOLEAN DEFAULT TRUE
 );
 
--- Trainer availability table
+-- Trainer availability
 CREATE TABLE TrainerAvailability (
     availability_id SERIAL PRIMARY KEY,
     trainer_id INT REFERENCES Trainer(trainer_id),
@@ -84,7 +92,7 @@ CREATE TABLE TrainerAvailability (
 -- Equipment
 CREATE TABLE Equipment (
     equipment_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    equip_name VARCHAR(100) UNIQUE NOT NULL
 );
 
 -- Maintenance log
@@ -92,33 +100,80 @@ CREATE TABLE MaintenanceLog (
     maintenance_id SERIAL PRIMARY KEY,
     equipment_id INT REFERENCES Equipment(equipment_id),
     issue_description TEXT NOT NULL,
-    assigned_to INT REFERENCES Admin(admin_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    assigned_to VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Pending',
+    notes TEXT
 );
 
---- Default Data
+CREATE TABLE MemberClass (
+    member_id INT REFERENCES Member(member_id),
+    class_id INT REFERENCES GroupClass(class_id),
+    PRIMARY KEY (member_id, class_id)
+);
 
--- Default Admins
-INSERT INTO Admin (name, email) VALUES
-('Vanesa Smith', 'vanesa.smith@example.com'),
-('John Doe', 'john.doe@example.com')
-ON CONFLICT (email) DO NOTHING;
+-- VIEW
 
--- Default Members
-INSERT INTO Member (name, email, date_of_birth, gender, contact) VALUES
-('Ash Ketchum', 'ash.ketchum@example.com', '2000-05-22', 'Male', '123-456-7890'),
-('Misty Waterflower', 'misty.water@example.com', '2001-07-15', 'Female', '098-765-4321')
-ON CONFLICT (email) DO NOTHING;
+CREATE OR REPLACE VIEW MemberDashboardView AS
+SELECT 
+    m.member_id,
+    m.name,
+    m.email,
 
--- Default Trainers
-INSERT INTO Trainer (name, email, specialty) VALUES
-('Brock Stone', 'brock.stone@example.com', 'Strength Training'),
-('Tracey Sketchit', 'tracey.sketchit@example.com', 'Cardio')
-ON CONFLICT (email) DO NOTHING;
+    (SELECT weight FROM HealthMetric hm 
+     WHERE hm.member_id = m.member_id 
+     ORDER BY metric_time DESC LIMIT 1) AS latest_weight,
 
--- Default Equipment
-INSERT INTO Equipment (name) VALUES
-('Dumbbells'),
-('Treadmill'),
-('Yoga Mats')
-ON CONFLICT (name) DO NOTHING;
+    (SELECT height FROM HealthMetric hm 
+     WHERE hm.member_id = m.member_id 
+     ORDER BY metric_time DESC LIMIT 1) AS latest_height,
+
+    (SELECT heart_rate FROM HealthMetric hm 
+     WHERE hm.member_id = m.member_id 
+     ORDER BY metric_time DESC LIMIT 1) AS latest_heart_rate,
+
+    (SELECT target_weight FROM FitnessGoal fg 
+     WHERE fg.member_id = m.member_id AND fg.active = TRUE 
+     ORDER BY start_date DESC LIMIT 1) AS active_target_weight,
+
+    (SELECT target_body_fat FROM FitnessGoal fg 
+     WHERE fg.member_id = m.member_id AND fg.active = TRUE 
+     ORDER BY start_date DESC LIMIT 1) AS active_target_body_fat
+
+FROM Member m;
+
+-- TRIGGER FUNCTION
+
+CREATE OR REPLACE FUNCTION prevent_trainer_overlap()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM TrainerAvailability ta
+        WHERE ta.trainer_id = NEW.trainer_id
+        AND (NEW.start_time, NEW.end_time) OVERLAPS (ta.start_time, ta.end_time)
+    ) THEN
+        RAISE EXCEPTION 'Trainer availability overlaps with an existing time slot.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER
+
+CREATE TRIGGER check_trainer_availability_overlap
+BEFORE INSERT OR UPDATE ON TrainerAvailability
+FOR EACH ROW
+EXECUTE FUNCTION prevent_trainer_overlap();
+
+-- INDEXES
+
+-- Speed up trainer time conflict checks
+CREATE INDEX idx_ptsession_trainer_time
+ON PTSession (trainer_id, start_time, end_time);
+
+-- Speed up name lookups for trainer screen
+CREATE INDEX idx_member_name ON Member(name);
+
+-- Speed up room schedule lookups
+CREATE INDEX idx_room_name ON Room(room_name);
