@@ -13,6 +13,8 @@ private:
     PGconn* conn;
 
 public:
+
+    // Constructor
     Database(const string& conninfo) {
         conn = PQconnectdb(conninfo.c_str());
         if (PQstatus(conn) != CONNECTION_OK) {
@@ -20,6 +22,7 @@ public:
         }
     }
 
+    // If an error occurs for SQL stuff
     PGresult* exec(const string& q) {
         PGresult* res = PQexec(conn, q.c_str());
         ExecStatusType status = PQresultStatus(res);
@@ -33,6 +36,7 @@ public:
         return res;
     }
 
+    // Deconstructor
     ~Database() {
         PQfinish(conn);
     }
