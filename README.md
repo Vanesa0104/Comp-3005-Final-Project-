@@ -152,18 +152,29 @@ Final Project/
 
 ---
 
+## Video Link
+
+```
+https://youtu.be/1XPUgxgiAAo
+```
+
+---
+
 ## Notes
 
 * Make sure PostgreSQL is running before launching the app.
 * The app must connect to the `fitness` database.
 * Tables must be created before running the app, otherwise SQL errors will occur.
 * Also I'm assuming that a weekly availablity is only for say about a month (4 weeks) and not indefinitely
+* Also I fixed the final little error that occurs at the very end of the video, where you can delete a class that doesn't exist. Will now show error message.
 
 ---
 
 ## Author
 
 Ana Vanesa De Leon Bonilla
+
 101279256
+
 COMP 3005 - Final Project
 
